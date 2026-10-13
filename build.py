@@ -1,6 +1,8 @@
 """Genera una landing por sede a partir de template.html.
 
 Uso:  python build.py            -> crea sedes/<slug>/index.html (una carpeta por sede)
+Si una sede tiene placeId 'PENDIENTE' (sin Business Profile) su página sale sin la sección de reseña;
+al poner su Place ID en template.html y volver a correr el script, la reseña aparece sola.
 La sede queda fija: sin selector, con su nombre visible y su Place ID de reseña.
 Cada carpeta es autosuficiente (logo y favicon incrustados): se puede publicar
 como raíz de su propio subdominio.
@@ -43,10 +45,17 @@ def build(slug, nombre, place):
     s = sub_once(s, '<select id="sede2" aria-label="Elige tu sede" class="hide"></select>', '')
     s = sub_once(s, "var s2 = $('sede2'); s2.innerHTML = sedeSel.innerHTML;\n  s2.addEventListener('change', function(){ sedeSel.value = s2.value; pintarResena(); });\n", '')
     s = sub_once(s, "    $('sede2').classList.toggle('hide', !!s); $('sede2').value = sedeSel.value;\n", '')
+    # Sede sin Business Profile (placeId PENDIENTE): no hay reseña que pedir, solo opt-in
+    if place == 'PENDIENTE':
+        s = sub_once(s, '.sede-line{', '#resena,#skip{display:none!important}\n.sede-line{')
+        s = sub_once(s, 'Dos toques y listo: recibe recordatorios de tu vehículo en WhatsApp y cuéntanos cómo te fue.',
+                        'Recibe recordatorios de tu vehículo y novedades de La Rueda por WhatsApp.')
     # la sede va en el origen del registro
     s = s.replace("origen: 'optin-qr'", "origen: 'optin-qr-%s'" % slug)
     return s
 
+import shutil
+shutil.rmtree(OUT, ignore_errors=True)  # no dejar carpetas de sedes que ya no existen
 os.makedirs(OUT, exist_ok=True)
 for slug, nombre, place in sedes:
     d = os.path.join(OUT, slug)
