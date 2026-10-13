@@ -109,26 +109,19 @@ footer a{color:inherit}
       <div class="phone"><span>+57</span><input type="tel" id="tel" name="tel" inputmode="numeric" autocomplete="tel-national" maxlength="14" placeholder="300 123 4567" required></div>
       <div class="err" id="e-tel"></div>
 
-      <label>¿Qué quieres recibir? <span style="font-weight:400;color:var(--mut)">Elige al menos uno</span></label>
-      <div class="topics">
-        <label class="chk"><input type="checkbox" name="tema" value="recordatorios"> Recordatorios de cambio de aceite, alineación y llantas</label>
-        <label class="chk"><input type="checkbox" name="tema" value="citas"> Confirmaciones y cambios de mis citas</label>
-        <label class="chk"><input type="checkbox" name="tema" value="promos"> Promociones y descuentos</label>
-      </div>
-      <div class="err" id="e-tema"></div>
 
       <!-- Consentimiento: casilla SIN marcar por defecto y texto explícito (exigido por Meta) -->
       <div class="consent" id="consent">
         <label class="chk" for="acepto">
           <input type="checkbox" id="acepto" name="acepto" required>
-          <span>Sí, autorizo a <b>LA RUEDA S.A.S.</b> (La Rueda Continental) a tratar mis datos y a escribirme por WhatsApp al número que ingresé con los mensajes que marqué arriba.</span>
+          <span>Sí, autorizo a <b>LA RUEDA S.A.S.</b> (La Rueda Continental) a tratar mis datos y a escribirme por WhatsApp al número que ingresé.</span>
         </label>
-        <small class="legal-short">Responsable: LA RUEDA S.A.S. Solo usaremos tus datos para enviarte lo que elegiste. Responde <b>SALIR</b> para parar.</small>
+        <small class="legal-short">Responsable: LA RUEDA S.A.S. Solo usaremos tus datos para escribirte por WhatsApp. Responde <b>SALIR</b> para parar.</small>
         <details class="legal">
           <summary>Ver información legal completa</summary>
           <small>
             <b>Responsable:</b> LA RUEDA S.A.S., NIT 860.402.526-8, Calle 13 # 53-16, Bogotá D.C., tel. (601) 415 9900.<br>
-            <b>Finalidad:</b> enviarte por WhatsApp los mensajes que elegiste, gestionar tus citas y asociar tu visita a la sede donde te atendimos.<br>
+            <b>Finalidad:</b> escribirte por WhatsApp con información de tus servicios, recordatorios, confirmación de citas y promociones, gestionar tus citas y asociar tu visita a la sede donde te atendimos.<br>
             <b>Tus derechos:</b> puedes conocer, actualizar, rectificar y suprimir tus datos, y revocar esta autorización, escribiendo a <a href="mailto:servicioalcliente@larueda.com.co">servicioalcliente@larueda.com.co</a>. Para dejar de recibir mensajes responde <b>SALIR</b> en cualquier momento.<br>
             Más información en nuestra <a href="https://larueda.co/politica-de-privacidad" target="_blank" rel="noopener" class="ph">política de tratamiento de datos</a> (Ley 1581 de 2012).
           </small>
@@ -251,12 +244,10 @@ var CONFIG = {
     $('e-form').classList.add('hide');
     var nombre = $('nombre').value.trim(), tel = normTel($('tel').value), ok = true, primero = null;
     function mal(id,msg,el){ $(id).textContent=msg; ok=false; if(!primero) primero=el; }
-    ['e-sede','e-nombre','e-tel','e-tema','e-acepto'].forEach(function(id){$(id).textContent=''});
+    ['e-sede','e-nombre','e-tel','e-acepto'].forEach(function(id){$(id).textContent=''});
     if(!sedeSel.value) mal('e-sede','Elige la sede donde estás.',sedeSel);
     if(nombre.length<2) mal('e-nombre','Escribe tu nombre.',$('nombre'));
     if(!tel) mal('e-tel','Ingresa un celular colombiano de 10 dígitos (ej. 300 123 4567).',$('tel'));
-    var temas = Array.prototype.map.call(document.querySelectorAll('input[name=tema]:checked'), function(c){return c.value});
-    if(!temas.length) mal('e-tema','Elige al menos un tipo de mensaje.',document.querySelector('input[name=tema]'));
     var acepto = $('acepto').checked;
     $('consent').classList.toggle('bad', !acepto);
     if(!acepto) mal('e-acepto','Marca la casilla para poder escribirte por WhatsApp.',$('acepto'));
@@ -269,7 +260,7 @@ var CONFIG = {
 
     var consentText = $('consent').textContent.replace(/\s+/g,' ').trim();
     var payload = {
-      nombre: nombre, telefono: '57'+tel, sede: s.slug, temas: temas,
+      nombre: nombre, telefono: '57'+tel, sede: s.slug,
       consentimiento: true, texto_consentimiento: consentText,
       canal: 'qr-sede', origen: 'optin-qr', fecha: new Date().toISOString(),
       url: location.href, user_agent: navigator.userAgent, utm: UTM
@@ -298,7 +289,7 @@ var CONFIG = {
 PENDIENTES ANTES DE IMPRIMIR LOS QR
 1. Place ID de cada una de las 10 sedes (CONFIG.sedes[].placeId). Cómo: Google Perfil de Empresa → la sede → "Pedir reseñas" → copiar el enlace
    (contiene el Place ID), o usar Place ID Finder de Google. Hasta entonces el botón abre la ficha de Maps como respaldo.
-2. CONFIG.registroUrl: webhook de n8n que inserte en Supabase (tabla sugerida wa_optins: nombre, telefono, sede, temas, texto_consentimiento, fecha, url, user_agent, utm).
+2. CONFIG.registroUrl: webhook de n8n que inserte en Supabase (tabla sugerida wa_optins: nombre, telefono, sede, texto_consentimiento, fecha, url, user_agent, utm).
    Guardar el texto exacto y la fecha del consentimiento es la prueba de opt-in que pide Meta.
 3. URL real de la política de tratamiento de datos (marcada en amarillo en pantalla, clase .ph).
    Datos del responsable tomados del RUT: LA RUEDA S.A.S., NIT 860.402.526-8, Calle 13 # 53-16, Bogotá D.C., (601) 415 9900.
